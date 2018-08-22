@@ -4,10 +4,25 @@ import numpy
 
 ts = numpy.loadtxt("trainingSet.txt", usecols=[1,2,3])#numpy.loadtxt('c:\\Python_fiddling\\myProject\\MF\\trainingSet.txt',usecols=[1,2,3])
 X = ts[:,0:2]
+print(len(X), len(X[0]))
 Y = ts[:,2]
+print(len(Y))
 
-mf = [[['gaussmf',{'mean':0.,'sigma':1.}],['gaussmf',{'mean':-1.,'sigma':2.}],['gaussmf',{'mean':-4.,'sigma':10.}],['gaussmf',{'mean':-7.,'sigma':7.}]],
-            [['gaussmf',{'mean':1.,'sigma':2.}],['gaussmf',{'mean':2.,'sigma':3.}],['gaussmf',{'mean':-2.,'sigma':10.}],['gaussmf',{'mean':-10.5,'sigma':5.}]]]
+mf = \
+[
+    [
+        ['gaussmf',{'mean':0.,'sigma':1.}],
+        ['gaussmf',{'mean':-1.,'sigma':2.}],
+        ['gaussmf',{'mean':-4.,'sigma':10.}],
+        ['gaussmf',{'mean':-7.,'sigma':7.}]
+    ],
+    [
+        ['gaussmf',{'mean':1.,'sigma':2.}],
+        ['gaussmf',{'mean':2.,'sigma':3.}],
+        ['gaussmf',{'mean':-2.,'sigma':10.}],
+        ['gaussmf',{'mean':-10.5,'sigma':5.}]
+    ]
+]
 
 
 mfc = membership.membershipfunction.MemFuncs(mf)

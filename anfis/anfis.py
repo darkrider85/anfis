@@ -9,6 +9,7 @@ import numpy as np
 from membership import mfDerivs
 import copy
 
+
 class ANFIS:
     """Class to implement an Adaptive Network Fuzzy Inference System: ANFIS"
 
@@ -62,15 +63,15 @@ class ANFIS:
 
         while (epoch < epochs) and (convergence is not True):
 
-            #layer four: forward pass
+            # layer four: forward pass
             [layerFour, wSum, w] = forwardHalfPass(self, self.X)
 
-            #layer five: least squares estimate
+            # layer five: least squares estimate
             layerFive = np.array(self.LSE(layerFour,self.Y,initialGamma))
             self.consequents = layerFive
             layerFive = np.dot(layerFour,layerFive)
 
-            #error
+            # error
             error = np.sum((self.Y-layerFive.T)**2)
             print 'current error: ', error
             average_error = np.average(np.absolute(self.Y-layerFive.T))
@@ -116,14 +117,12 @@ class ANFIS:
             else:
                 dAlpha = -eta * np.array(dE_dAlpha)
 
-
             for varsWithMemFuncs in range(len(self.memFuncs)):
                 for MFs in range(len(self.memFuncsByVariable[varsWithMemFuncs])):
                     paramList = sorted(self.memFuncs[varsWithMemFuncs][MFs][1])
                     for param in range(len(paramList)):
                         self.memFuncs[varsWithMemFuncs][MFs][1][paramList[param]] = self.memFuncs[varsWithMemFuncs][MFs][1][paramList[param]] + dAlpha[varsWithMemFuncs][MFs][param]
             epoch = epoch + 1
-
 
         self.fittedValues = predict(self,self.X)
         self.residuals = self.Y - self.fittedValues[:,0]
@@ -168,16 +167,15 @@ class ANFIS:
             plt.show()
 
 
-
 def forwardHalfPass(ANFISObj, Xs):
     layerFour = np.empty(0,)
     wSum = []
 
     for pattern in range(len(Xs[:,0])):
-        #layer one
+        # layer one
         layerOne = ANFISObj.memClass.evaluateMF(Xs[pattern,:])
 
-        #layer two
+        # layer two
         miAlloc = [[layerOne[x][ANFISObj.rules[row][x]] for x in range(len(ANFISObj.rules[0]))] for row in range(len(ANFISObj.rules))]
         layerTwo = np.array([np.product(x) for x in miAlloc]).T
         if pattern == 0:
@@ -264,7 +262,7 @@ def predict(ANFISObj, varsToTest):
 
     [layerFour, wSum, w] = forwardHalfPass(ANFISObj, varsToTest)
 
-    #layer five
+    # layer five
     layerFive = np.dot(layerFour,ANFISObj.consequents)
 
     return layerFive

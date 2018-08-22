@@ -7,10 +7,10 @@ Created on Mon Mar 31 15:41:58 2014
 
 from skfuzzy import gaussmf, gbellmf, sigmf
 
+
 class MemFuncs:
     'Common base class for all employees'
     funcDict = {'gaussmf': gaussmf, 'gbellmf': gbellmf, 'sigmf': sigmf}
-
 
     def __init__(self, MFList):
         self.MFList = MFList
