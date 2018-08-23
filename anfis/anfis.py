@@ -35,7 +35,9 @@ class ANFIS:
         self.XLen = len(self.X)
         self.memClass = copy.deepcopy(memFunction)
         self.memFuncs = self.memClass.MFList
+        # building a index list of the member functions (given them ids)
         self.memFuncsByVariable = [[x for x in range(len(self.memFuncs[z]))] for z in range(len(self.memFuncs))]
+        # rules is a cartesian product of the ids of the member functions
         self.rules = np.array(list(itertools.product(*self.memFuncsByVariable)))
         self.consequents = np.empty(self.Y.ndim * len(self.rules) * (self.X.shape[1] + 1))
         self.consequents.fill(0)
@@ -129,7 +131,6 @@ class ANFIS:
 
         return self.fittedValues
 
-
     def plotErrors(self):
         if self.trainingType == 'Not trained yet':
             print self.trainingType
@@ -172,28 +173,36 @@ def forwardHalfPass(ANFISObj, Xs):
     wSum = []
 
     for pattern in range(len(Xs[:,0])):
-        # layer one
-        layerOne = ANFISObj.memClass.evaluateMF(Xs[pattern,:])
+        print("next pattern: {0}".format(pattern))
 
-        # layer two
+        # layer one: membership grade
+        layerOne = ANFISObj.memClass.evaluateMF(Xs[pattern,:])
+        print("layer 1: shape: {0}; vals: {1}".format((len(layerOne), len(layerOne[0])), layerOne))
+
+        # layer two: rule firing strength (condition strength)
+        print("rules: {0}".format(ANFISObj.rules))
         miAlloc = [[layerOne[x][ANFISObj.rules[row][x]] for x in range(len(ANFISObj.rules[0]))] for row in range(len(ANFISObj.rules))]
+        print("miAlloc: {0}".format(miAlloc))
         layerTwo = np.array([np.product(x) for x in miAlloc]).T
         if pattern == 0:
             w = layerTwo
         else:
             w = np.vstack((w,layerTwo))
 
-        #layer three
+        print("Layer 2: shape: {0}; vals: {1}".format(layerTwo.shape, layerTwo))
+
+        # layer three: normalization of firing strength
         wSum.append(np.sum(layerTwo))
         if pattern == 0:
             wNormalized = layerTwo/wSum[pattern]
         else:
             wNormalized = np.vstack((wNormalized,layerTwo/wSum[pattern]))
 
-        #prep for layer four (bit of a hack)
+        # prep for layer four (bit of a hack)
         layerThree = layerTwo/wSum[pattern]
         rowHolder = np.concatenate([x*np.append(Xs[pattern,:],1) for x in layerThree])
         layerFour = np.append(layerFour,rowHolder)
+        print("layer 4: shape: {0}; vals: {1}".format(layerFour.shape, layerFour))
 
     w = w.T
     wNormalized = wNormalized.T
