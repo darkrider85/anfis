@@ -60,10 +60,12 @@ class ANFIS:
             # get the actual result label i
             b = np.array(rhsMat[i])
 
+            # dot product: scalarproduct or row r of first matrix and column c of second matrix; positioning in the result matrix (r, c)
             S = S - (np.array(
                         np.dot(
                             np.dot(
-                                np.dot(S, np.matrix(a).transpose()),
+                                np.dot(S,
+                                       np.matrix(a).transpose()),
                                 np.matrix(a)),
                             S))) / (1 + (np.dot(np.dot(S, a), a)))
             x = x + (np.dot(S, np.dot(np.matrix(a).transpose(), (np.matrix(b) - np.dot(np.matrix(a), x)))))
@@ -71,6 +73,14 @@ class ANFIS:
         return x
 
     def trainHybridJangOffLine(self, epochs=5, tolerance=1e-5, initialGamma=1000, k=0.01):
+        """
+
+        :param epochs: number of training epochs
+        :param tolerance: convergence error to stop training
+        :param initialGamma:
+        :param k: numeric with the initial step size for learning rule
+        :return:
+        """
 
         self.trainingType = 'trainHybridJangOffLine'
         convergence = False
@@ -229,6 +239,9 @@ def forwardHalfPass(ANFISObj, Xs):
     # split the entire vector in sub arrays so that we gain a matrix where each row is the result of one input row (one row is the output for one input vrow of the input matrix)
     layerFour = np.array(np.array_split(layerFour,pattern + 1))
     print("Layer 4 (after): shape: {0}; vals: {1}".format(layerFour.shape, layerFour))
+    with open("layer4.txt", 'a') as f:
+        np.set_printoptions(threshold=np.inf)
+        print >> f, layerFour, f
 
     return layerFour, wSum, w
 
