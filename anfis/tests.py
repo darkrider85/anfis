@@ -35,3 +35,26 @@ if round(anf.consequents[-1][0],6) == -5.275538 and round(anf.consequents[-2][0]
 	print 'test is good'
 anf.plotErrors()
 anf.plotResults()
+
+
+# Matt's test
+""" mf = \
+    [
+        [
+            ['gaussmf',{'mean':0.,'sigma':1.}],
+            ['gaussmf',{'mean':-1.,'sigma':2.}],
+            ['gaussmf',{'mean':-4.,'sigma':10.}],
+            ['gaussmf',{'mean':-7.,'sigma':7.}]
+        ],
+        [
+            ['gaussmf',{'mean':1.,'sigma':2.}],
+            ['gaussmf',{'mean':2.,'sigma':3.}],
+            ['gaussmf',{'mean':-2.,'sigma':10.}],
+            ['gaussmf',{'mean':-10.5,'sigma':5.}]
+        ]
+    ]
+
+mfc = membership.membershipfunction.MemFuncs(mf)
+anf = anfis.ANFIS(X, Y, mfc)
+anf.trainHybridJangOffLine(epochs=20)
+"""

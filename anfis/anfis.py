@@ -46,15 +46,28 @@ class ANFIS:
         self.trainingType = 'Not trained yet'
 
     def LSE(self, A, B, initialGamma = 1000.):
+        # coeffMat is the result of layer 4 (in the example a 121x48 matrix)
         coeffMat = A
+        # rhsMat is the label matrix holding the actual results of the training set (121x1)
         rhsMat = B
+        # create an identity matrix of the same shape as the second dimension of the result matrx (in the example 48) and set the values on the diagonal to initialGamma
         S = np.eye(coeffMat.shape[1])*initialGamma
         x = np.zeros((coeffMat.shape[1],1)) # need to correct for multi-dim B
         for i in range(len(coeffMat[:,0])):
+            # get the i-th row of the result matrix
             a = coeffMat[i,:]
+
+            # get the actual result label i
             b = np.array(rhsMat[i])
-            S = S - (np.array(np.dot(np.dot(np.dot(S,np.matrix(a).transpose()),np.matrix(a)),S)))/(1+(np.dot(np.dot(S,a),a)))
-            x = x + (np.dot(S,np.dot(np.matrix(a).transpose(),(np.matrix(b)-np.dot(np.matrix(a),x)))))
+
+            S = S - (np.array(
+                        np.dot(
+                            np.dot(
+                                np.dot(S, np.matrix(a).transpose()),
+                                np.matrix(a)),
+                            S))) / (1 + (np.dot(np.dot(S, a), a)))
+            x = x + (np.dot(S, np.dot(np.matrix(a).transpose(), (np.matrix(b) - np.dot(np.matrix(a), x)))))
+
         return x
 
     def trainHybridJangOffLine(self, epochs=5, tolerance=1e-5, initialGamma=1000, k=0.01):
@@ -71,10 +84,10 @@ class ANFIS:
             # layer five: least squares estimate
             layerFive = np.array(self.LSE(layerFour,self.Y,initialGamma))
             self.consequents = layerFive
-            layerFive = np.dot(layerFour,layerFive)
+            layerFive = np.dot(layerFour, layerFive)
 
             # error
-            error = np.sum((self.Y-layerFive.T)**2)
+            error = np.sum((self.Y - layerFive.T)**2)
             print 'current error: ', error
             average_error = np.average(np.absolute(self.Y-layerFive.T))
             self.errors = np.append(self.errors,error)
@@ -172,6 +185,8 @@ def forwardHalfPass(ANFISObj, Xs):
     layerFour = np.empty(0,)
     wSum = []
 
+    # Xs[:, 0] -> get the entire first column of the input matrix
+    # ref: https://stackoverflow.com/questions/35205173/numpy-array-slicing-using-commas?rq=1
     for pattern in range(len(Xs[:,0])):
         print("next pattern: {0}".format(pattern))
 
@@ -200,14 +215,20 @@ def forwardHalfPass(ANFISObj, Xs):
 
         # prep for layer four (bit of a hack)
         layerThree = layerTwo/wSum[pattern]
+        print("Layer 3: shape: {0}; vals: {1}".format(layerThree.shape, layerThree))
+        # multiply the inputs with the normalized fire strengths and put the results in one vector consisting of (in_1, in_2, ..., 1) * weights_vector
         rowHolder = np.concatenate([x*np.append(Xs[pattern,:],1) for x in layerThree])
+        print("rowHolder: shape: {0}; vals: {1}".format(len(rowHolder), rowHolder))
+        # collecting all results in layerFour first
         layerFour = np.append(layerFour,rowHolder)
-        print("layer 4: shape: {0}; vals: {1}".format(layerFour.shape, layerFour))
+        print("Layer 4 (before): shape: {0}; vals: {1}".format(layerFour.shape, layerFour))
 
     w = w.T
     wNormalized = wNormalized.T
-
+    print("pattern: ", pattern)
+    # split the entire vector in sub arrays so that we gain a matrix where each row is the result of one input row (one row is the output for one input vrow of the input matrix)
     layerFour = np.array(np.array_split(layerFour,pattern + 1))
+    print("Layer 4 (after): shape: {0}; vals: {1}".format(layerFour.shape, layerFour))
 
     return layerFour, wSum, w
 
